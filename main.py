@@ -1,14 +1,12 @@
 
 
-import os
+
 import subprocess
-import sys
+
 
 def main():
-    run_cfg = subprocess.run(["iperf3.exe","-c speedtest.serverius.net -p5202"])
-
-
-
+    cfg = ("iperf3.exe")
+    act = subprocess.run(cfg, input("iperf3 -c speedtest.hostkey.ru -p5202"))
 
 
 
