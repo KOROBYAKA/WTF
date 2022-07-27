@@ -3,10 +3,16 @@ import sys
 from sys import argv
 import os.path
 def main():
-    script, host, port,bw = argv
-    port = "-p"+port
-    data = [host,port]
-    xx = " ".join(data)
+    try:
+        script, host, port,bw = argv
+        port = "-p"+port
+        data = [host,port]
+        xx = " ".join(data)
+
+    except ValueError:
+        pass
+        print('''Give arguments or use manual config or test for test''')
+        xx = input('''For example "*host IP* -p*port number* *bandwidth*" \n -->>''')
 
     x = 1
     xstr = str(x)
@@ -25,10 +31,19 @@ def main():
             chk = 0
     crt = open(file,"w")
 
-    #xx =" -c 192.168.0.14 -p5201  --length 6472 -u --bytes 1342177280 --bandwidth 0 "
-    cfg = ("iperf3.exe iperf3 -c" + xx + " --length 6472 -u --bytes 1342177280 --bandwidth " + bw + " --logfile "+file)
-    #cfg = ("iperf3.exe iperf3 -c speedtest.hostkey.ru -p5202 --logfile "+file)
-    print(cfg)
+    if xx != "manual" and xx != "test":
+        xx = xx.split(" ")
+        xx[-1] = "--bandwidth" + xx[-1]
+        xx = "".join(xx)
+        cfg = ("iperf3.exe iperf3 -c " + xx + " --length 6472 -u --bytes 1342177280  --logfile " + file)
+    if xx == "manual":
+        xx = input("Give Iperf3 startup config: ")
+        cfg = ("iperf3.exe iperf3 " + xx)
+    if xx == "test":
+        cfg = ("iperf3.exe iperf3 -c iperf.eenet.ee -p5201 --logfile iperf_test.log")
+        file = "iperf_test.log"
+
+
     act = subprocess.run(cfg)
 
 
