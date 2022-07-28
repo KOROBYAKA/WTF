@@ -7,7 +7,7 @@ import argparse
 def main():
     sys = platform.system()
     parser = argparse.ArgumentParser()
-    parser.add_argument('-host','--host',help = '''Host's IP address''')
+    parser.add_argument('-host',help = '''Host's IP address''')
     parser.add_argument('-BW','-bw','--bandwidth', default = 0, help = 'Bandwidth optional argument(default 0)')
     parser.add_argument('-p','--port',default = 5201, help = 'Port for connection to server')
     args = parser.parse_args()
@@ -33,14 +33,15 @@ def main():
         elif file_check == False:
             chk = 0
     crt = open(file,"w")
-    crt.close()
+    file.close()
 
     if sys == 'Windows':
-        cfg = (f"iperf3.exe  iperf3 -c {host} -p{port} {bw} --length 6472 -u --bytes 1342177280 -logfile {file}")
+        cfg = (f"iperf3.exe  iperf3 -c {host} -p{port} --bandwidth {bw} -u --bytes 1342177280 --length 6472 --logfile {file}")
+        print(cfg)
         act = subprocess.run(cfg)
         subprocess.run("notepad " + file)
     elif sys == 'Linux':
-        cfg = (f"iperf3 -c {host} -p{port} {bw} --length 6472 -u --bytes 1342177280 -logfile {file}")
+        cfg = (["iperf3",f"-c{host}",f"-p{port}","-u","-n 66000megabits","--length 6472",f"b {bw}",f"-logfile {file}"])
         act = subprocess.run(cfg)
 
 
