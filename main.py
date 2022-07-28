@@ -37,13 +37,15 @@ def main():
 
     if sys == 'Windows':
         cfg = (f"iperf3.exe  iperf3 -c {host} -p{port} {bw} --length 6472 -u --bytes 1342177280 -logfile {file}")
-    elif sys = 'Linux':
-        
+        act = subprocess.run(cfg)
+        subprocess.run("notepad " + file)
+    elif sys == 'Linux':
+        cfg = (f"iperf3 -c {host} -p{port} {bw} --length 6472 -u --bytes 1342177280 -logfile {file}")
+        act = subprocess.run(cfg)
 
-    act = subprocess.run(cfg)
 
 
 
-    subprocess.run("notepad "+file)
+
 if __name__ == '__main__':
     main()
