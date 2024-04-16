@@ -1,3 +1,4 @@
-# korobka
-This is simple script to run iperf3 on Linux or Windows.
-There's manual on Russian language, but soon I'll add english. 
+# WTF - Wi-Fi Test Flow
+Software generates a data flow, that is used to test Wi-Fi throughput capabilities. As a traffic generator tool iperf3 is used.
+Software automatically changes Wi-Fi physical parameters (channnel, bandwidth, TX power), saves all test results.
+
