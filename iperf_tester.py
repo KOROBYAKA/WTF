@@ -4,7 +4,8 @@ from sys import argv
 import platform
 import os.path
 import argparse
-def main():
+
+def iperf_test():
     sys = platform.system()
     parser = argparse.ArgumentParser()
     parser.add_argument('-host',help = '''Host's IP address''')
@@ -48,5 +49,3 @@ def main():
 
 
 
-if __name__ == '__main__':
-    main()
