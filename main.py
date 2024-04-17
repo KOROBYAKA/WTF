@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import iperf_tester
-import open_socket
-import socket
+import wifi_capabilities
+
 
 import subprocess
 import sys
@@ -12,9 +12,9 @@ import argparse
 
 
 def main():
-    UDP_PORT_NUMBER = 0
-    IP_ADDR = socket.gethostbyname(socket.gethostname())
-    UDP_SOCKET = open_socket.open_UDP(UDP_PORT_NUMBER, IP_ADDR)
+    wifi_if = 'wlp1s0'
+    isAP = wifi_capabilities.AP_check(wifi_if)#check if our interface is Wi-Fi AP
+
 
 
 
