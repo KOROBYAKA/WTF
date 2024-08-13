@@ -51,7 +51,7 @@ wifi_channels = {
 
 def run_cmd(cmd:str):
     print(f"#{cmd}")
-    time.sleep(0.05)
+    time.sleep(0.07)
 
 
 async def main():
@@ -59,7 +59,7 @@ async def main():
     parser = argparse.ArgumentParser(description="Wi-Fi interface and IP addresses for AP and client")
     parser.add_argument("--interface", "-i", help="Access Point interface", type=str, required=True)
     parser.add_argument("--client", "-c", help="Client device IP address", type=str, required=True)
-    parser.add_argument("--AP_IP", "-B", help="Access Point interface IP address", type=str, required=True)
+    parser.add_argument("--AP_IP", "-B", help="Access Point interface IP address(IP address of this device)", type=str, required=True)
     parser.add_argument("--special_mode","-sm",help = "Specify bandwidth to be tested on all channels(optional)",
                         type=str)
     parser.add_argument("--client_user","-usr", help = "Specify client device user to run throughput util",
@@ -75,10 +75,28 @@ async def main():
     client = Client(ip=args.client,passwd=args.client_passwd,usr_name=args.client_user)
     client.status = client.check_client()
     isAP = wifi_capabilities.AP_check(wifi_iface)#check if our interface is Wi-Fi AP
+    ch_num = 36
+    channel = wifi_channels[ch_num]
+    i = 0
+    bw = 0
+    while isAP:
+        if (channel[-1] == bw):
+            ch_num += 4
+            channel = wifi_channels[ch_num]
+            i = 0
+            bw = 0
+        bw = channel[i]
+        i += 1
+        wifi_capabilities.set_signal(wifi_iface,ch_num,bw)
+        time.sleep(300)
+        client.status = client.check_client()
+        if(client.status):
+            client.run_client()
+            
 
 
-#TODO
- #add test logic
+
+
 
 
             #TODO
