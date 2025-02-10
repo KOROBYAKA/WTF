@@ -22,12 +22,12 @@ class Client():
 
 
 
-    async def run_client(client:Client):
-        async with asyncssh.connect(client.ip, username = client.usr_name,password = client.passwd) as conn:
-            result = await conn.run(f"iperf3 -s -B {client.ip}",check = True)
-            print('Running iperf3 server on client')
+        async def run_client(client:Client):
+            async with asyncssh.connect(client.ip, username = client.usr_name,password = client.passwd) as conn:
+                result = await conn.run(f"iperf3 -s -B {client.ip}",check = True)
+                print('Running iperf3 server on client')
 
-    async def kill_iperf(client:Client):
+    async def kill_iperf(client):
         async with asyncssh.connect(client.ip, username = client.usr_name,password = client.passwd) as conn:
             res = await conn.run('killall iperf3', check=True)
             print("I'm done, boss")
@@ -35,7 +35,7 @@ class Client():
 
 
 
-    def wait_for_client(client:Client):
+    def wait_for_client(client):
         failed_reconnects_in_row = 0
         while True:
             client.status = client.check_client()
