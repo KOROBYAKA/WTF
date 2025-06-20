@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 import asyncio
 import tomllib
-import time
-
+import subprocess
+from client_side import Client
 
 
 wifi_channels = {
@@ -35,7 +35,7 @@ wifi_channels = {
     173: [20, 40]
 }
 
-
+skip = 0
 
 def check_defaults(defaults):
     command = [f'-t {defaults["timeout"]}']
@@ -55,44 +55,58 @@ def check_defaults(defaults):
 
 def run_cmd(cmd:str):
     print(f"#{cmd}")
-    time.sleep(0.1)
+    subprocess.run(cmd, shell=True)
 
 
 async def main():
+    final_result = []
     with open("conf.toml", mode="rb") as fp:
         config = tomllib.load(fp)
+    print(config)
+    #options = check_defaults(config["defaults"])
+    print(config["AP_info"])
+    AP = Client(*[value for key,value in config["AP_info"].items()])
+    AP.print()
+    run_cmd("iperf3 -s -D")
+    #Initial check for AP accessibility
+    if not AP.connection_status():
+        print("FAILED: AP.connection_status()")
+        return 0
+    if not await AP.ap_status():
+        print("FAILED: AP.ap_status()")
+        return 0
+    if not await AP.credentials_check():
+        print("FAILED: AP.ap_status()")
+        return 0
 
-    options = check_defaults(config["defaults"])
-    print(options)
+    await asyncio.sleep(1)
+    print("Starting tests")
+    for channel, freq in wifi_channels.items():
+            for width in freq:
+                print(f"Setting channel and bandwidth: {channel}:{width}MHz")
+                if config["AP_info"]["os"]: await AP.set_wifi_capabilities_OpenWrt(channel,width)
+                skip = 0
+                for x in range(0,4,1):
+                    if AP.connection_status():
+                        break
+                    else:
+                        if x == 3:
+                            print(f"Reconnect tries are gone, probably AP is not capable to work on channel {channel} with bandwidth {width}MHz.\nHint: "
+                                  f"if you are sure that AP is capable to work with this physical signal configuration increase the timeout time")
+                            skip = 1
+                        else:
+                            print("AP is offline, waiting for set up time")
+                        await asyncio.sleep(30)
+                if skip: continue
+                result = await AP.getter(config["locals"]["wifi_ip"],config["locals"]["timeout"])
+                await asyncio.sleep(int(config["defaults"]["timeout"]))
+                final_result.append(result)
+                print(result)
+                print(final_result)
 
 
-    '''isAP = wifi_capabilities.AP_check(wifi_iface)#check if our interface is Wi-Fi AP
-    ch_num = 36
-    channel = wifi_channels[ch_num]
-    i = 0
-    bw = 0
-    while isAP:
-        if (channel[-1] == bw):
-            ch_num += 4
-            channel = wifi_channels[ch_num]
-            i = 0
-            bw = 0
-        bw = channel[i]
-        i += 1
-        wifi_capabilities.set_signal(wifi_iface,ch_num,bw)
-        time.sleep(300)
-        client.status = client.check_client()
-        if(client.status):
-            client.run_client()
-            
+    print(final_result)
 
-
-
-
-
-
-            #TODO
-            #add logic that skip channel settings after 4 failed reconnects'''
 
 
 

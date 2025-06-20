@@ -4,7 +4,7 @@ def AP_check(wifi_interface:str):#check if our desirable interface exists and is
     cmd = f"iw  {wifi_interface} info | grep type"
     try:
         result = subprocess.check_output(cmd,shell = True, text = True)
-        if result == 'type ap':
+        if any(ap in ['AP','ap'] for ap in result):
             return True
         else:
             raise TypeError(f"Wi-Fi module should be at the AP mode, instead of {result}")
