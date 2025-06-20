@@ -35,7 +35,6 @@ wifi_channels = {
     173: [20, 40]
 }
 
-skip = 0
 
 def check_defaults(defaults):
     command = [f'-t {defaults["timeout"]}']
@@ -85,7 +84,7 @@ async def main():
             for width in freq:
                 print(f"Setting channel and bandwidth: {channel}:{width}MHz")
                 if config["AP_info"]["os"]: await AP.set_wifi_capabilities_OpenWrt(channel,width)
-                skip = 0
+                skip = False
                 for x in range(0,4,1):
                     if AP.connection_status():
                         break
@@ -93,7 +92,7 @@ async def main():
                         if x == 3:
                             print(f"Reconnect tries are gone, probably AP is not capable to work on channel {channel} with bandwidth {width}MHz.\nHint: "
                                   f"if you are sure that AP is capable to work with this physical signal configuration increase the timeout time")
-                            skip = 1
+                            skip = True
                         else:
                             print("AP is offline, waiting for set up time")
                         await asyncio.sleep(30)

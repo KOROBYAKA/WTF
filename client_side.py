@@ -1,6 +1,5 @@
 import subprocess
 import asyncssh
-from async_timeout import timeout
 import asyncio
 
 
@@ -95,7 +94,7 @@ class Client():
                 return False
 
     async def run_test(self, ip, timeout):
-        self.run_iperf()
+        await self.run_iperf()
         cmd = f"iperf3 -c {self.ip_ap} -B {ip} -b 0 -t {timeout}"
         print(f"#{cmd}")
         proc = await asyncio.create_subprocess_shell(cmd)
