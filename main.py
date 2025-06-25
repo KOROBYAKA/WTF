@@ -3,36 +3,36 @@ import asyncio
 import tomllib
 import subprocess
 from client_side import Client
-
+import os
 
 wifi_channels = {
-    36: [20, 40, 80, 160],
-    40: [20, 40, 80, 160],
-    44: [20, 40, 80, 160],
-    48: [20, 40, 80, 160],
-    52: [20, 40, 80, 160],
-    56: [20, 40, 80, 160],
-    60: [20, 40, 80, 160],
-    64: [20, 40, 80, 160],
-    100: [20, 40, 80, 160],
-    104: [20, 40, 80, 160],
-    108: [20, 40, 80, 160],
-    112: [20, 40, 80, 160],
-    116: [20, 40, 80, 160],
-    120: [20, 40, 80, 160],
-    124: [20, 40, 80, 160],
-    128: [20, 40, 80, 160],
+    36: [20, 40, 80],
+    40: [20, 40, 80],
+    44: [20, 40, 80],
+    48: [20, 40, 80],
+    52: [20, 40, 80],
+    56: [20, 40, 80],
+    60: [20, 40, 80],
+    64: [20, 40, 80],
+    100: [20, 40, 80],
+    104: [20, 40, 80],
+    108: [20, 40, 80],
+    112: [20, 40, 80],
+    116: [20, 40, 80],
+    120: [20, 40, 80],
+    124: [20, 40, 80],
+    128: [20, 40, 80],
     132: [20, 40, 80],
     136: [20, 40, 80],
     140: [20, 40, 80],
     144: [20, 40, 80],
-    149: [20, 40, 80, 160],
-    153: [20, 40, 80, 160],
-    157: [20, 40, 80, 160],
-    161: [20, 40, 80, 160],
+    149: [20, 40, 80],
+    153: [20, 40, 80],
+    157: [20, 40, 80],
+    161: [20, 40, 80],
     165: [20, 40, 80],
-    169: [20, 40],
-    173: [20, 40]
+    169: [20, 40, 80],
+    173: [20, 40, 80]
 }
 
 
@@ -61,29 +61,14 @@ async def main():
     final_result = []
     with open("conf.toml", mode="rb") as fp:
         config = tomllib.load(fp)
-    print(config)
-    #options = check_defaults(config["defaults"])
-    print(config["AP_info"])
     AP = Client(*[value for key,value in config["AP_info"].items()])
-    AP.print()
-    run_cmd("iperf3 -s -D")
-    #Initial check for AP accessibility
-    if not AP.connection_status():
-        print("FAILED: AP.connection_status()")
-        return 0
-    if not await AP.ap_status():
-        print("FAILED: AP.ap_status()")
-        return 0
-    if not await AP.credentials_check():
-        print("FAILED: AP.ap_status()")
-        return 0
 
-    await asyncio.sleep(1)
     print("Starting tests")
     for channel, freq in wifi_channels.items():
-            for width in freq:
-                print(f"Setting channel and bandwidth: {channel}:{width}MHz")
-                if config["AP_info"]["os"]: await AP.set_wifi_capabilities_OpenWrt(channel,width)
+            for width in freq :
+                print(f"Setting channel:{channel} and bandwidth:{width}MHz")
+                if config["AP_info"]["os"]: await AP.set_wifi_capabilities_OpenWrt(channel,width,config["defaults"]["ht_mode"])
+                await asyncio.sleep(10)
                 skip = False
                 for x in range(0,4,1):
                     if AP.connection_status():
@@ -97,10 +82,9 @@ async def main():
                             print("AP is offline, waiting for set up time")
                         await asyncio.sleep(30)
                 if skip: continue
-                result = await AP.getter(config["locals"]["wifi_ip"],config["locals"]["timeout"])
+                result = await AP.getter(config["locals"]["wifi_ip"],config["defaults"]["timeout"])
                 await asyncio.sleep(int(config["defaults"]["timeout"]))
                 final_result.append(result)
-                print(result)
                 print(final_result)
 
 

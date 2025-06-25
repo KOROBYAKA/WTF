@@ -43,12 +43,12 @@ class Client():
             print('AP is not reachable')
             return False
 
-    async def set_wifi_capabilities_OpenWrt(self,channel:int,bw:int):
+    async def set_wifi_capabilities_OpenWrt(self,channel:int,bw:int, ht_mode:str):
         #Due to the target OS is an OpenWRT, UCI configuration interface
         #is used to set up desirable Wi-Fi Capabilities
         #If you want use it on another
         cmds = [f"uci set wireless.{self.uci_ap}.channel='{channel}'",
-                f"uci set wireless.{self.uci_ap}.htmode='HT{bw}'",
+                f"uci set wireless.{self.uci_ap}.htmode='VHT{bw}'",
                 "uci commit",
                 "wifi reload"]
         for cmd in cmds:
@@ -67,7 +67,6 @@ class Client():
                 res = await conn.create_process(f'{cmd}{x}')
                 stdout = await res.stdout.read()
                 result1[x] = stdout
-        print("res1 ",result1)
         await self.run_test(ip,timeout)
         await asyncio.sleep(timeout)
         async with asyncssh.connect(self.ip, username=self.usr_name, password=self.passwd) as conn:
@@ -75,12 +74,9 @@ class Client():
                 res = await conn.create_process(f'{cmd}{x}')
                 stdout = await res.stdout.read()
                 result2[x] = stdout
-        print("res2 ",result2)
-        print(result1.keys())
-        for key in result1:
-            print(key)
         for key in result1.keys():
             delta[key] = int(result1[key].strip())-int(result2[key].strip())
+        print(delta)
         return delta
 
     async def ap_status(self):
@@ -97,7 +93,7 @@ class Client():
         await self.run_iperf()
         cmd = f"iperf3 -c {self.ip_ap} -B {ip} -b 0 -t {timeout}"
         print(f"#{cmd}")
-        proc = await asyncio.create_subprocess_shell(cmd)
+        proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.DEVNULL)
         await proc.wait()
 
     async def run_iperf(self):
