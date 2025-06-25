@@ -1,0 +1,44 @@
+# Default config
+#
+
+#Wi-Fi interface's IP address on host
+[locals]
+control_ip = ""
+wifi_ip = ""
+
+[AP_info]
+# AP user credentials
+ap_user = ""
+ap_user_password = ""
+ap_ip_control = ""
+#set the name that is used by UCI, to see use cmd "uci show wireless", needed for OpenWrt usage
+uci_ap_iface = ""
+ap_wifi_iface = ""
+ap_wifi_ip = ""
+# One test time period (in seconds)setting
+os = 1 #OS = 1 if OS on AP is OpenWRT
+#allows to use a specific Wi-Fi capabilites mechanism, that privided by OpenWRT
+[defaults]
+timeout = 15
+
+#HT_mode equals HT or VHT
+ht_mode = "VHT"
+
+#Bandwidth limit, default 0 -> no limited
+bandwidth = 0
+
+# Packet length for iperf3
+# packet_length = 0 --> no limit
+packet_length = 0
+
+# Bidirectional: 1 - bidirectional / 0 - unidirectional
+bidir = 0
+
+# By default, AP transceives data to the host with this application
+# reverse = 0 --> AP = TX & host = RX
+# reverse = 1 --> AP = RX & host = TX
+reverse = 0
+
+# Packet fragmentation function performed by iperf3
+# fragmentation: 0 - disabled / 1 - enabled
+fragmentation = 1

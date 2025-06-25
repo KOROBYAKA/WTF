@@ -2,7 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+conf.toml
 # C extensions
 *.so
 .idea/
