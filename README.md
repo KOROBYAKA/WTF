@@ -1,5 +1,6 @@
 # WTF - Wi-Fi Test Framework
 
-Software generates a data flow, that is used to test Wi-Fi throughput capabilities. As a traffic generator tool iperf3 is used.
-Software automatically changes Wi-Fi physical parameters (channnel, bandwidth, TX power), saves all test results.
-
+Script for test automation of speed tests on different physical capabilities of Wi-Fi signal. At this momnent designed for OpenWrt(uses UCI&SSH).
+###
+- runs iperf3 as a traffic generation tool
+###
