@@ -3,25 +3,25 @@
 
 #Wi-Fi interface's IP address on host
 [locals]
-control_ip = "192.168.2.204"
-wifi_ip = "192.168.16.131"
+control_ip = ""
+wifi_ip = ""
 
 [AP_info]
 # AP user credentials
-ap_user = "root"
-ap_user_password = "KOKA3156"
-ap_ip_control = "192.168.2.1"
+ap_user = ""
+ap_user_password = ""
+ap_ip_control = ""
 #set the name that is used by UCI, to see use cmd "uci show wireless", needed for OpenWrt usage
-uci_ap_iface = "radio1"
-ap_wifi_iface = "phy1-ap0"
-ap_wifi_ip = "192.168.16.1"
+uci_ap_iface = ""
+ap_wifi_iface = ""
+ap_wifi_ip = ""
 # One test time period (in seconds)setting
 os = 1 #OS = 1 if OS on AP is OpenWRT
 #allows to use a specific Wi-Fi capabilites mechanism, that privided by OpenWRT
 [defaults]
 timeout = 15
 
-#HT_mode HT or VHT
+#HT_mode equals HT or VHT
 ht_mode = "VHT"
 
 #Bandwidth limit, default 0 -> no limited
