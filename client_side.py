@@ -1,16 +1,20 @@
 import subprocess
+from wave import Error
+
 import asyncssh
 import asyncio
 
 
 class Client():
-    def __init__(self,ap_user:str,ap_user_password:str,ap_ip_control:str,uci_ap_iface:str,ap_wifi_iface:str,ap_wifi_ip:str,os:str):
+    def __init__(self,ap_user:str,ap_user_password:str,ap_ip_control:str,uci_ap_iface:str,ap_wifi_iface:str,
+                ap_phy:str,ap_wifi_ip:str,os:str):
         self.usr_name = ap_user
         self.passwd = ap_user_password
         self.ip =  ap_ip_control
         self.ip_ap = ap_wifi_ip
         self.ap_iface = ap_wifi_iface
         self.uci_ap = uci_ap_iface
+        self.ap_phy = ap_phy
         self.os = os
 
 
@@ -23,9 +27,24 @@ class Client():
             print("AP SSH CONNECTION STATUS:OK\r")
             return True
 
+    async def get_wifi_capabilities(self):
+        wifi_channels_list = []
+        async with asyncssh.connect(self.ip, username=self.usr_name, password=self.passwd) as conn:
+            ht_modes = await conn.run(f"iwinfo {self.ap_phy} htmodelist")
+            wifi_channels = await conn.run(f"iwinfo {self.ap_phy} freq")
+            for line in wifi_channels.stdout.split("\n"):
+                try:
+                    wifi_channels_list.append(line.strip("*()/").split()[6].strip("()/*"))
+                except:
+                    continue
+            return wifi_channels_list,ht_modes.stdout.split()
+
+
+
+
 
     def connection_status(self):
-        cmd = [f"ping {self.ip} -c 1 -W 0.5"]
+        cmd = [f"ping {self.ip} -c 1 -W 0.1"]
         print("#"," ".join(cmd))
         ping_res_ip = subprocess.run(cmd, shell=True, text=True, capture_output=True)
         if ping_res_ip.returncode == 0:
@@ -43,12 +62,12 @@ class Client():
             print('AP is not reachable')
             return False
 
-    async def set_wifi_capabilities_OpenWrt(self,channel:int,bw:int, ht_mode:str):
+    async def set_wifi_capabilities_OpenWrt(self,channel:int, ht_mode:str):
         #Due to the target OS is an OpenWRT, UCI configuration interface
         #is used to set up desirable Wi-Fi Capabilities
         #If you want use it on another
         cmds = [f"uci set wireless.{self.uci_ap}.channel='{channel}'",
-                f"uci set wireless.{self.uci_ap}.htmode='VHT{bw}'",
+                f"uci set wireless.{self.uci_ap}.htmode='{ht_mode}'",
                 "uci commit",
                 "wifi reload"]
         for cmd in cmds:
@@ -75,7 +94,7 @@ class Client():
                 stdout = await res.stdout.read()
                 result2[x] = stdout
         for key in result1.keys():
-            delta[key] = int(result1[key].strip())-int(result2[key].strip())
+            delta[key] = int(result2[key].strip())-int(result1[key].strip())
         print(delta)
         return delta
 
@@ -95,6 +114,8 @@ class Client():
         print(f"#{cmd}")
         proc = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.DEVNULL)
         await proc.wait()
+        await self.kill_iperf()
+
 
     async def run_iperf(self):
         async with asyncssh.connect(self.ip, username = self.usr_name,password = self.passwd) as conn:
@@ -104,7 +125,7 @@ class Client():
     async def kill_iperf(self):
         async with asyncssh.connect(self.ip, username = self.usr_name,password = self.passwd) as conn:
             res = await conn.run('killall iperf3')
-            print("I'm done, boss")
+            #print("I'm done, boss")
 
 
 
