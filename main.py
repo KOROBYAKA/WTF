@@ -1,8 +1,40 @@
 #!/usr/bin/python3
-import asyncio
 import tomllib
 import subprocess
-from client_side import Client
+import time
+from test_logic import Ap
+import json
+from datetime import datetime
+
+
+def save_output(final_result):
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    output_file = f"test_results_{timestamp}.json"
+    with open(output_file, "w") as f:
+        json.dump(final_result, f, indent=4)
+
+    print(f"Saved test results to {output_file}")
+
+def print_results(final_result, htmodes, channels, timeout):
+    for channel in channels:
+        ht = []
+        tx_res = []
+        rx_res = []
+        print(f"Test channel: {channel}")
+        for htmode in htmodes:
+            try:
+                ht.append( f" {htmode:^13} ")
+                value = final_result[channel][htmode]['rx_bytes'] / (timeout * 1024)
+                formatted = f"{value:.2f}kB/s"
+                rx_res.append(f" {formatted:^13} ")
+                value = final_result[channel][htmode]['tx_bytes'] / (timeout * 1024)
+                formatted = f"{value:.2f}kB/s"
+                tx_res.append(f" {formatted:^13} ")
+            except:
+                continue
+        print("HT MODE  |","|".join(ht))
+        print("TX BYTES |","|".join(tx_res))
+        print("RX BYTES |","|".join(rx_res))
 
 
 def check_defaults(defaults):
@@ -20,30 +52,38 @@ def check_defaults(defaults):
 
     return ' '.join(command)
 
-
 def run_cmd(cmd:str):
     print(f"#{cmd}")
     subprocess.run(cmd, shell=True)
 
-
-async def main():
+def main():
     final_result = {}
     with open("conf.toml", mode="rb") as fp:
         config = tomllib.load(fp)
-    AP = Client(*[value for key,value in config["AP_info"].items()])
 
-    wifi_channels,ht_modes =  await AP.get_wifi_capabilities()
+    AP = Ap(
+    uci_ap_iface=config["ap_conf"]["uci_ap_iface"],
+    ap_wifi_iface=config["ap_conf"]["ap_wifi_iface"],
+    ap_phy=config["ap_conf"]["ap_phy"],
+    ap_wifi_ip=config["ap_conf"]["ap_wifi_ip"],
+    ip_client=config["client_conf"]["wifi_ip"]
+    )
+    if not AP.ap_status():
+        print("Access Point software interface is disabled (check UCI)")
+        exit()
+    #wifi_channels,ht_modes = AP.get_wifi_capabilities()
+    wifi_channels = ['1','2']
+    ht_modes = ['HT20','HT40']
     print("Starting tests")
-
     for channel in wifi_channels:
         final_result[channel] = {}
         for htmode in ht_modes:
             print(f"Setting channel:{channel} and htmode: {htmode}")
-            if config["AP_info"]["os"]: await AP.set_wifi_capabilities_OpenWrt(channel,htmode)
-            await asyncio.sleep(1)
+            AP.set_wifi_capabilities_OpenWrt(channel,htmode)
+            time.sleep(5)
             skip = False
             for x in range(0,4,1):
-                if AP.connection_status():
+                if AP.connection_status() and AP.ap_link_status():
                     break
                 else:
                     if x == 3:
@@ -52,16 +92,16 @@ async def main():
                         skip = True
                     else:
                         print("AP is offline, waiting for set up time")
-                    await asyncio.sleep(1)
+                        time.sleep(5+x*5)
             if skip: continue
-            result = await AP.getter(config["locals"]["wifi_ip"],config["defaults"]["timeout"])
-            await asyncio.sleep(int(config["defaults"]["timeout"]))
+            result = AP.getter(config["defaults"]["timeout"])
             final_result[channel][htmode] = result
-            print(final_result)
 
-    print(final_result)
-
-
+    print_results(final_result,ht_modes,wifi_channels,config["defaults"]["timeout"])
+    save_output(final_result)
 
 
-asyncio.run(main())
+
+
+if __name__ == "__main__":
+    main()

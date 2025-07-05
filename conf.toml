@@ -1,29 +1,26 @@
 # Default config
-#
 
 #Wi-Fi interface's IP address on host
-[locals]
-control_ip = ""
+[client_conf]
+#Wi-Fi connection
 wifi_ip = ""
 
-[AP_info]
-# AP user credentials
-ap_user = ""
-ap_user_password = ""
-ap_ip_control = ""
-#set the name that is used by UCI, to see use cmd "uci show wireless", needed for OpenWrt usage
-uci_ap_iface = ""
-ap_wifi_iface = ""
+[ap_conf]
+#Wi-Fi connection
 ap_wifi_ip = ""
-# One test time period (in seconds)setting
-os = 1 #OS = 1 if OS on AP is OpenWRT
-#allows to use a specific Wi-Fi capabilites mechanism, that privided by OpenWRT
+
+#Set the name that is used by UCI, to see use cmd "uci show wireless", needed for OpenWrt usage
+uci_ap_iface = ""
+
+#Set a name of interface, to find use iw dev -> Interface
+ap_wifi_iface = ""
+
+#Set a name of physical device, to find use iwinfo phyname
+ap_phy = ""
+
 [defaults]
+#Test duration(seconds)
 timeout = 15
-
-#HT_mode equals HT or VHT
-ht_mode = "VHT"
-
 #Bandwidth limit, default 0 -> no limited
 bandwidth = 0
 
