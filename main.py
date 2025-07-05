@@ -71,9 +71,9 @@ def main():
     if not AP.ap_status():
         print("Access Point software interface is disabled (check UCI)")
         exit()
-    #wifi_channels,ht_modes = AP.get_wifi_capabilities()
-    wifi_channels = ['1','2']
-    ht_modes = ['HT20','HT40']
+    wifi_channels,ht_modes = AP.get_wifi_capabilities()
+    #wifi_channels = ['1','2']
+    #ht_modes = ['HT20','HT40']
     print("Starting tests")
     for channel in wifi_channels:
         final_result[channel] = {}
