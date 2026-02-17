@@ -8,7 +8,7 @@ Script for test automation of speed tests on different physical capabilities of 
 
 Setup on OpenWRT:
 1. opkg update
-2. opkg install python git
+2. opkg install python git iperf3
 3. git clone https://github.com/KOROBYAKA/WTF.git
 4. cd WTF
 5. nano conf.toml #set your config
